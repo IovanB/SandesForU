@@ -4,6 +4,7 @@ using SandesForU.Context;
 using SandesForU.Models;
 using SandesForU.Repositories;
 using SandesForU.Repositories.Interfaces;
+using SandesForU.Services;
 
 namespace SandesForU;
 public class Startup
@@ -24,11 +25,18 @@ public class Startup
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
+        services.AddAuthorization(options =>
+        options.AddPolicy("Admin", policy =>
+        {
+            policy.RequireRole("Admin");
+        }));
+
         services.AddTransient<ILancheRepository, LancheRepository>();
         services.AddTransient<ICategoriaRepository, CategoriaRepository>();
         services.AddTransient<IPedidoRepository, PedidoRepository>();
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddScoped(sp => CarrinhoCompra.GetCarrinhoCompra(sp));
+        services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
 
         services.AddControllersWithViews();
 
@@ -37,7 +45,7 @@ public class Startup
 
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ISeedUserRoleInitial seedUserRoleInitial)
     {
         if (env.IsDevelopment())
         {
@@ -55,6 +63,9 @@ public class Startup
         app.UseStaticFiles();
         app.UseRouting();
 
+        seedUserRoleInitial.SeedRoes();
+        seedUserRoleInitial.SeedUsers();
+
         app.UseSession();
 
         app.UseAuthentication();
@@ -62,6 +73,11 @@ public class Startup
 
         app.UseEndpoints(endpoints =>
         {
+            endpoints.MapControllerRoute(
+                name: "areas",
+                pattern: "{area:exists}/{controller=Admin}/{action=Index}/{id?}"
+         );
+
             endpoints.MapControllerRoute(
                 name: "categoriaFiltro",
                 pattern: "Lanche/{action}/{categoria?}",

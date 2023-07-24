@@ -36,6 +36,7 @@ namespace SandesForU.Controllers
             if(user != null)
             {
                 var result = await signInManager.PasswordSignInAsync(user, model.Password, false, false);
+
                 if (result.Succeeded)
                 {
                     if (string.IsNullOrEmpty(model.ReturnUrl))
@@ -66,6 +67,7 @@ namespace SandesForU.Controllers
                 var result = await userManager.CreateAsync(user, registerVM.Password);
                 if (result.Succeeded)
                 {
+                    await userManager.AddToRoleAsync(user, "Member");
                     return RedirectToAction("Login", "Account");
                 }
                 else
@@ -85,6 +87,11 @@ namespace SandesForU.Controllers
             await signInManager.SignOutAsync();
 
             return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
     }
 }
