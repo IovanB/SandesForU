@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using ReflectionIT.Mvc.Paging;
 using SandesForU.Context;
 using SandesForU.Models;
 using SandesForU.Repositories;
@@ -39,6 +40,11 @@ public class Startup
         services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
 
         services.AddControllersWithViews();
+
+        services.AddPaging(options=> {
+            options.ViewName = "Bootstrap4";
+            options.PageParameterName = "pageindex";
+        } );
 
         services.AddMemoryCache();
         services.AddSession();
