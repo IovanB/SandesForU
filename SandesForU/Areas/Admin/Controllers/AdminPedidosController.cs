@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using ReflectionIT.Mvc.Paging;
 using SandesForU.Context;
 using SandesForU.Models;
+using SandesForU.ViewModels;
 
 namespace LanchesMac.Areas.Admin.Controllers
 {
@@ -16,6 +17,28 @@ namespace LanchesMac.Areas.Admin.Controllers
         public AdminPedidosController(AppDbContext context)
         {
             _context = context;
+        }
+
+        public IActionResult PedidoLanches(int? id)
+        {
+            var pedido = _context.Pedidos
+                .Include(x => x.PedidoItens)
+                .ThenInclude(x => x.Lanche)
+                .FirstOrDefault(x => x.PedidoId == id); 
+
+            if(pedido == null)
+            {
+                Response.StatusCode = 404;
+                return View("PedidoNotFound", id.Value);
+            }
+
+            var pedidoLanches = new PedidoLancheViewModel()
+            {
+                Pedido = pedido,
+                PedidoDetalhes = pedido.PedidoItens
+            };
+
+            return View(pedidoLanches);
         }
 
         // GET: Admin/AdminPedidos
