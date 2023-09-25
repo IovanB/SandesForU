@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using ReflectionIT.Mvc.Paging;
+using SandesForU.Areas.Admin.Services;
 using SandesForU.Context;
 using SandesForU.Models;
 using SandesForU.Repositories;
@@ -26,6 +27,10 @@ public class Startup
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
+        services.ConfigureApplicationCookie(options => options.AccessDeniedPath = "/Home/AccessDenied");
+
+        services.Configure<ConfigurationImages>(Configuration.GetSection("ConfigurationPastaImagens"));
+
         services.AddAuthorization(options =>
         options.AddPolicy("Admin", policy =>
         {
@@ -38,6 +43,7 @@ public class Startup
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddScoped(sp => CarrinhoCompra.GetCarrinhoCompra(sp));
         services.AddScoped<ISeedUserRoleInitial, SeedUserRoleInitial>();
+        services.AddScoped<RelatorioVendasService>();
 
         services.AddControllersWithViews();
 
